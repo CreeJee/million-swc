@@ -19,9 +19,7 @@ fn transform_function_declartion(
     if !from_react {
         return;
     }
-
-    let f = decl
-        .to_owned()
+    decl.to_owned()
         .specifiers
         .into_iter()
         .for_each(|item| match item {
@@ -45,11 +43,11 @@ fn transform_function_declartion(
         });
 }
 
-pub struct AutoTransformVisitor {
-    context: ProgramStateContext,
+pub struct AutoTransformVisitor<'a> {
+    context: &'a mut ProgramStateContext,
 }
 
-impl VisitMut for AutoTransformVisitor {
+impl VisitMut for AutoTransformVisitor<'_> {
     // Implement necessary visit_mut_* methods for actual custom transform.
     // A comprehensive list of possible visitor methods can be found here:
     // https://rustdoc.swc.rs/swc_ecma_visit/trait.VisitMut.html
@@ -58,20 +56,16 @@ impl VisitMut for AutoTransformVisitor {
     fn visit_mut_call_expr(&mut self, n: &mut swc_core::ecma::ast::CallExpr) {}
 }
 
-pub struct HOCTrasnformVisitor {
-    context: ProgramStateContext,
+pub struct HOCTrasnformVisitor<'a> {
+    context: &'a mut ProgramStateContext,
 }
-impl VisitMut for HOCTrasnformVisitor {
+impl VisitMut for HOCTrasnformVisitor<'_> {
     fn visit_mut_import_decl(&mut self, n: &mut swc_core::ecma::ast::ImportDecl) {
         transform_function_declartion(self, n);
     }
 }
-pub fn million_auto_program(program: Program, context: ProgramStateContext) -> Program {
+pub fn million_auto_program(program: Program, context: &mut ProgramStateContext) -> Program {
     program
-        .fold_with(&mut as_folder(HOCTrasnformVisitor {
-            context: context.clone(),
-        }))
-        .fold_with(&mut as_folder(AutoTransformVisitor {
-            context: context.clone(),
-        }))
+        .fold_with(&mut as_folder(HOCTrasnformVisitor { context }))
+        .fold_with(&mut as_folder(AutoTransformVisitor { context }))
 }

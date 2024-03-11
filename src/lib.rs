@@ -38,7 +38,7 @@ pub fn process_transform(program: Program, metadata: TransformPluginProgramMetad
             .expect("failed to get plugin config for transform-imports"),
     )
     .expect("invalid packages");
-    let ref context: config::ProgramStateContext = ProgramStateContext {
+    let ref mut context: config::ProgramStateContext = ProgramStateContext {
         options: options,
         identifiers: HashMap::new(),
         namespaces: HashMap::new(),
@@ -46,7 +46,7 @@ pub fn process_transform(program: Program, metadata: TransformPluginProgramMetad
         server_mode: ServerMode::Client,
         top_level_rsc: false,
     };
-    return million_program(program, &context);
+    return million_program(program, context);
 }
 // An example to test plugin transform.
 // Recommended strategy to test plugin's transform is verify
