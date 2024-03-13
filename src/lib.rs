@@ -32,7 +32,7 @@ pub fn process_transform(program: Program, metadata: TransformPluginProgramMetad
     let options = serde_json::from_str::<Config>(
         &metadata
             .get_transform_plugin_config()
-            .expect("failed to get plugin config for transform-imports"),
+            .expect("failed to get plugin config for millionjs"),
     )
     .expect("invalid packages");
     let ref mut context: config::ProgramStateContext = ProgramStateContext {
