@@ -19,7 +19,5 @@ pub fn million_program(program: Program, context: &mut ProgramStateContext) -> P
         Some(true) => million_auto_program(program, context),
         _ => program,
     }
-    .fold_with(&mut as_folder(BlockTransformVisitor {
-        context: context.clone(),
-    }))
+    .fold_with(&mut as_folder(BlockTransformVisitor { context: context }))
 }
