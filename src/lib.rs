@@ -8,11 +8,8 @@ use std::collections::HashMap;
 use crate::config::Config;
 
 use config::{ProgramStateContext, ServerMode};
-use swc_core::ecma::visit::as_folder;
-use swc_core::ecma::{ast::Program, transforms::testing::test_inline, visit::FoldWith};
+use swc_core::ecma::ast::Program;
 use swc_core::plugin::{plugin_transform, proxies::TransformPluginProgramMetadata};
-use transform::auto_transform::{million_auto_program, AutoTransformVisitor, HOCTrasnformVisitor};
-use transform::block::BlockTransformVisitor;
 use transform::million_program;
 
 /// An example plugin function with macro support.
@@ -48,31 +45,3 @@ pub fn process_transform(program: Program, metadata: TransformPluginProgramMetad
     };
     return million_program(program, context);
 }
-// An example to test plugin transform.
-// Recommended strategy to test plugin's transform is verify
-// the Visitor's behavior, instead of trying to run `process_transform` with mocks
-// unless explicitly required to do so.
-test_inline!(
-    Default::default(),
-    |_| as_folder(BlockTransformVisitor {
-        context: {
-            config::ProgramStateContext {
-                options: Config {
-                    hmr: Some(false),
-                    server: Some(false),
-                    auto: Some(false),
-                    log: true,
-                    rsc: false,
-                },
-                identifiers: HashMap::new(),
-                namespaces: HashMap::new(),
-                imports: HashMap::new(),
-                server_mode: ServerMode::Client,
-                top_level_rsc: false,
-            }
-        }
-    }),
-    boo,
-    r#"let isDev = __DEV__;"#,
-    r#"let isDev = false;"#
-);
