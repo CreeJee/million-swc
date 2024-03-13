@@ -22,7 +22,7 @@ pub fn register_import_definition(
                 return;
             }
             match current {
-                Some(foundCurrent) => foundCurrent.push(value),
+                Some(found_current) => found_current.push(value),
                 None => context.namespaces.insert_same(item.local, [value].to_vec()),
             }
         }
