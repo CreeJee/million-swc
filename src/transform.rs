@@ -1,23 +1,23 @@
 use swc_core::ecma::{
     ast::Program,
-    visit::{as_folder, FoldWith},
+    visit::{noop_fold_type, Fold, FoldWith},
 };
 
 use crate::config::ProgramStateContext;
 
-use self::{auto_transform::million_auto_program, block::BlockTransformVisitor};
+use self::{auto_transform::million_auto_program, block_transform::block_transform};
 
 pub mod auto_transform;
-pub mod block;
+pub mod block_transform;
 
 pub fn million_program(program: Program, context: &mut ProgramStateContext) -> Program {
     if context.options.rsc {
         // @TODO: how to owned by context?
         context.top_level_rsc = true
     }
-    match context.options.auto {
-        Some(true) => million_auto_program(program, context),
+    let auto_program = match context.options.auto {
+        Some(true) => program.fold_with(&mut million_auto_program(context)),
         _ => program,
-    }
-    .fold_with(&mut as_folder(BlockTransformVisitor { context: context }))
+    };
+    return auto_program.fold_with(&mut block_transform(context));
 }
