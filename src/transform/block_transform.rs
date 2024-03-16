@@ -1,3 +1,5 @@
+use std::borrow::BorrowMut;
+
 use swc_core::ecma::{
     ast::{Ident, ImportDecl, ImportSpecifier, ModuleExportName, Str},
     visit::{noop_fold_type, Fold},
@@ -28,7 +30,7 @@ fn transform_function_declartion(visitor: &mut BlockTransformVisitor, decl: &mut
                 if let ModuleExportName::Str(ref s) = imported {
                     if s.value.eq("memo") {
                         register_import_definition(
-                            visitor.context,
+                            visitor.context.borrow_mut(),
                             decl,
                             ImportSpecifier::Named(found_name),
                         )
@@ -38,10 +40,10 @@ fn transform_function_declartion(visitor: &mut BlockTransformVisitor, decl: &mut
             _ => {}
         });
 }
-pub struct BlockTransformVisitor<'a> {
-    pub context: &'a mut ProgramStateContext,
+pub struct BlockTransformVisitor {
+    pub context: ProgramStateContext,
 }
-impl Fold for BlockTransformVisitor<'_> {
+impl Fold for BlockTransformVisitor {
     noop_fold_type!();
 
     fn fold_import_decl(&mut self, mut n: ImportDecl) -> ImportDecl {
@@ -50,6 +52,6 @@ impl Fold for BlockTransformVisitor<'_> {
     }
 }
 
-pub fn million_block_transform(context: &mut ProgramStateContext) -> impl Fold {
+pub fn million_block_transform(context: ProgramStateContext) -> impl Fold {
     return BlockTransformVisitor { context };
 }

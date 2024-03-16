@@ -3,6 +3,7 @@ pub mod constants;
 pub mod transform;
 pub mod utils;
 
+use std::borrow::BorrowMut;
 use std::collections::HashMap;
 
 use crate::config::Config;
@@ -35,13 +36,6 @@ pub fn process_transform(program: Program, metadata: TransformPluginProgramMetad
             .expect("failed to get plugin config for millionjs"),
     )
     .expect("invalid packages");
-    let ref mut context: config::ProgramStateContext = ProgramStateContext {
-        options: options,
-        identifiers: HashMap::new(),
-        namespaces: HashMap::new(),
-        imports: HashMap::new(),
-        server_mode: ServerMode::Client,
-        top_level_rsc: false,
-    };
+    let context = ProgramStateContext::from(options);
     return million_program(program, context);
 }
