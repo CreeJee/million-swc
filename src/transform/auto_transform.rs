@@ -1,17 +1,52 @@
-use crate::config::ProgramStateContext;
+use std::borrow::BorrowMut;
+
+use crate::{
+    config::ProgramStateContext, constants::internal::INTERNAL_IDENT_SYMBOL_NAME,
+    utils::register::register_import_definition,
+};
 use swc_core::ecma::{
-    ast::{CallExpr, Function, ImportDecl, Program, VarDecl},
-    visit::{as_folder, Fold, FoldWith, VisitMut},
+    ast::{CallExpr, Function, Ident, ImportDecl, ImportSpecifier, ModuleExportName, Str, VarDecl},
+    visit::Fold,
 };
 pub struct AutoTransformVisitor {
     context: ProgramStateContext,
 }
 
-impl Fold for AutoTransformVisitor {
-    // Implement necessary visit_mut_* methods for actual custom transform.
-    // A comprehensive list of possible visitor methods can be found here:
-    // https://rustdoc.swc.rs/swc_ecma_visit/trait.VisitMut.html
+fn transform_function_declartion(visitor: &mut AutoTransformVisitor, decl: &mut ImportDecl) {
+    let export_name_defauit_ident =
+        ModuleExportName::Ident(Ident::from(INTERNAL_IDENT_SYMBOL_NAME));
 
+    let from_react = decl.src.eq(&Box::from(Str::from("react")));
+    if !from_react {
+        return;
+    }
+    decl.to_owned()
+        .specifiers
+        .into_iter()
+        .for_each(|item| match item {
+            ImportSpecifier::Named(found_name) => {
+                let imported = match found_name.imported {
+                    Some(ref item) => item,
+                    None => &export_name_defauit_ident,
+                };
+                if let ModuleExportName::Str(ref s) = imported {
+                    if s.value.eq("memo") {
+                        register_import_definition(
+                            visitor.context.borrow_mut(),
+                            decl,
+                            ImportSpecifier::Named(found_name),
+                        )
+                    }
+                }
+            }
+            _ => {}
+        });
+}
+impl Fold for AutoTransformVisitor {
+    fn fold_import_decl(&mut self, mut n: ImportDecl) -> ImportDecl {
+        transform_function_declartion(self, &mut n);
+        return n;
+    }
     fn fold_function(&mut self, n: Function) -> Function {
         return n;
     }
@@ -28,11 +63,8 @@ pub struct HOCTrasnformVisitor {
 }
 impl Fold for HOCTrasnformVisitor {
     // fn visit_mut_import_decl(&mut self, n: &mut swc_core::ecma::ast::ImportDecl) {}
-    fn fold_import_decl(&mut self, n: ImportDecl) -> ImportDecl {
-        return n;
-    }
 }
 
 pub fn million_auto_program(context: ProgramStateContext) -> impl Fold {
-    return HOCTrasnformVisitor { context: context };
+    AutoTransformVisitor { context }
 }
