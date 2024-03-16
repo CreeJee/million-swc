@@ -36,7 +36,6 @@ fn fixture(input: PathBuf) {
         namespaces: HashMap::new(),
         imports: HashMap::new(),
         server_mode: ServerMode::Client,
-        top_level_rsc: false,
     };
     let output = input.parent().unwrap().join("output.js");
     test_fixture(
