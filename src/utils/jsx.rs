@@ -1,8 +1,9 @@
 use swc_core::ecma::ast::{JSXAttr, JSXAttrName};
 
-pub fn is_attribute_unsupported(attribute: JSXAttr) -> bool {
+pub fn is_attribute_unsupported(attribute: &JSXAttr) -> bool {
     let unsupported = vec!["tw", "css"];
-    return match attribute.name {
+    let name = &attribute.name;
+    return match name {
         JSXAttrName::Ident(ident) => {
             let sym = ident.sym.to_string();
             unsupported.contains(&sym.as_str())
@@ -10,9 +11,10 @@ pub fn is_attribute_unsupported(attribute: JSXAttr) -> bool {
         _ => false,
     };
 }
-pub fn is_attribute_name_ref(attribute: JSXAttr) -> bool {
-    return match attribute.name {
-        JSXAttrName::Ident(ident) => ident.sym.to_string().eq("ref"),
+pub fn is_attribute_name_ref(attribute: &JSXAttr) -> bool {
+    let name = &attribute.name;
+    return match name {
+        JSXAttrName::Ident(ident) => ident.sym.eq("ref"),
         _ => false,
     };
 }
