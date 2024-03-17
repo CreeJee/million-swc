@@ -58,13 +58,6 @@ impl Fold for AutoTransformVisitor {
     }
 }
 
-pub struct HOCTrasnformVisitor {
-    context: ProgramStateContext,
-}
-impl Fold for HOCTrasnformVisitor {
-    // fn visit_mut_import_decl(&mut self, n: &mut swc_core::ecma::ast::ImportDecl) {}
-}
-
 pub fn million_auto_program(context: ProgramStateContext) -> impl Fold {
     AutoTransformVisitor { context }
 }

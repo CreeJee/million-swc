@@ -65,13 +65,6 @@ impl Fold for BlockTransformVisitor {
         transform_function_declartion(self, &mut n);
         return n;
     }
-    fn fold_call_expr(
-        &mut self,
-        n: swc_core::ecma::ast::CallExpr,
-    ) -> swc_core::ecma::ast::CallExpr {
-        // transform-block
-        n
-    }
 }
 
 pub fn million_block_transform(context: ProgramStateContext) -> impl Fold {

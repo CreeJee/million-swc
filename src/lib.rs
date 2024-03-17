@@ -3,12 +3,9 @@ pub mod constants;
 pub mod transform;
 pub mod utils;
 
-use std::borrow::BorrowMut;
-use std::collections::HashMap;
-
 use crate::config::Config;
 
-use config::{ProgramStateContext, ServerMode};
+use config::ProgramStateContext;
 use swc_core::ecma::ast::Program;
 use swc_core::plugin::{plugin_transform, proxies::TransformPluginProgramMetadata};
 use transform::million_program;
