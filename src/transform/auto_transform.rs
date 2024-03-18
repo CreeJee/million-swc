@@ -1,29 +1,63 @@
-use crate::config::ProgramStateContext;
-use swc_core::ecma::{
-    ast::Program,
-    visit::{as_folder, FoldWith, VisitMut},
+use std::borrow::BorrowMut;
+
+use crate::{
+    config::ProgramStateContext, constants::internal::INTERNAL_IDENT_SYMBOL_NAME,
+    utils::register::register_import_definition,
 };
-pub struct AutoTransformVisitor<'a> {
-    context: &'a mut ProgramStateContext,
+use swc_core::ecma::{
+    ast::{CallExpr, Function, Ident, ImportDecl, ImportSpecifier, ModuleExportName, Str, VarDecl},
+    visit::Fold,
+};
+pub struct AutoTransformVisitor {
+    context: ProgramStateContext,
 }
 
-impl VisitMut for AutoTransformVisitor<'_> {
-    // Implement necessary visit_mut_* methods for actual custom transform.
-    // A comprehensive list of possible visitor methods can be found here:
-    // https://rustdoc.swc.rs/swc_ecma_visit/trait.VisitMut.html
-    fn visit_mut_function(&mut self, n: &mut swc_core::ecma::ast::Function) {}
-    fn visit_mut_var_decl(&mut self, n: &mut swc_core::ecma::ast::VarDecl) {}
-    fn visit_mut_call_expr(&mut self, n: &mut swc_core::ecma::ast::CallExpr) {}
+fn transform_function_declartion(visitor: &mut AutoTransformVisitor, decl: &mut ImportDecl) {
+    let export_name_defauit_ident =
+        ModuleExportName::Ident(Ident::from(INTERNAL_IDENT_SYMBOL_NAME));
+
+    let from_react = decl.src.eq(&Box::from(Str::from("react")));
+    if !from_react {
+        return;
+    }
+    decl.to_owned()
+        .specifiers
+        .into_iter()
+        .for_each(|item| match item {
+            ImportSpecifier::Named(found_name) => {
+                let imported = match found_name.imported {
+                    Some(ref item) => item,
+                    None => &export_name_defauit_ident,
+                };
+                if let ModuleExportName::Str(ref s) = imported {
+                    if s.value.eq("memo") {
+                        register_import_definition(
+                            visitor.context.borrow_mut(),
+                            decl,
+                            ImportSpecifier::Named(found_name),
+                        )
+                    }
+                }
+            }
+            _ => {}
+        });
+}
+impl Fold for AutoTransformVisitor {
+    fn fold_import_decl(&mut self, mut n: ImportDecl) -> ImportDecl {
+        transform_function_declartion(self, &mut n);
+        return n;
+    }
+    fn fold_function(&mut self, n: Function) -> Function {
+        return n;
+    }
+    fn fold_var_decl(&mut self, n: VarDecl) -> VarDecl {
+        return n;
+    }
+    fn fold_call_expr(&mut self, n: CallExpr) -> CallExpr {
+        return n;
+    }
 }
 
-pub struct HOCTrasnformVisitor<'a> {
-    context: &'a mut ProgramStateContext,
-}
-impl VisitMut for HOCTrasnformVisitor<'_> {
-    fn visit_mut_import_decl(&mut self, n: &mut swc_core::ecma::ast::ImportDecl) {}
-}
-pub fn million_auto_program(program: Program, context: &mut ProgramStateContext) -> Program {
-    program
-        .fold_with(&mut as_folder(HOCTrasnformVisitor { context }))
-        .fold_with(&mut as_folder(AutoTransformVisitor { context }))
+pub fn million_auto_program(context: ProgramStateContext) -> impl Fold {
+    AutoTransformVisitor { context }
 }

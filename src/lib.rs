@@ -1,13 +1,11 @@
-mod config;
-mod constants;
-mod transform;
-mod utils;
-
-use std::collections::HashMap;
+pub mod config;
+pub mod constants;
+pub mod transform;
+pub mod utils;
 
 use crate::config::Config;
 
-use config::{ProgramStateContext, ServerMode};
+use config::ProgramStateContext;
 use swc_core::ecma::ast::Program;
 use swc_core::plugin::{plugin_transform, proxies::TransformPluginProgramMetadata};
 use transform::million_program;
@@ -35,13 +33,6 @@ pub fn process_transform(program: Program, metadata: TransformPluginProgramMetad
             .expect("failed to get plugin config for millionjs"),
     )
     .expect("invalid packages");
-    let ref mut context: config::ProgramStateContext = ProgramStateContext {
-        options: options,
-        identifiers: HashMap::new(),
-        namespaces: HashMap::new(),
-        imports: HashMap::new(),
-        server_mode: ServerMode::Client,
-        top_level_rsc: false,
-    };
+    let context = ProgramStateContext::from(options);
     return million_program(program, context);
 }

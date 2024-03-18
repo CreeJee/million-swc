@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{borrow::BorrowMut, collections::HashMap, sync::Arc};
 
 use serde::Deserialize;
 use swc_core::ecma::ast::{Ident, ImportDecl};
@@ -17,7 +17,7 @@ fn default_boolean() -> bool {
     true
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Copy, Default, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 
 pub struct Config {
@@ -44,12 +44,28 @@ pub enum ServerMode {
     Client,
 }
 
-#[derive(Clone, Debug)]
+impl Default for ServerMode {
+    fn default() -> Self {
+        Self::Client
+    }
+}
+
+#[derive(Clone, Default, Debug)]
 pub struct ProgramStateContext {
     pub options: Config,
     pub identifiers: HashMap<Ident, ImportDecl>,
     pub namespaces: HashMap<Ident, Vec<ImportDecl>>,
     pub imports: HashMap<Ident, ImportDecl>,
-    pub top_level_rsc: bool,
     pub server_mode: ServerMode,
+}
+impl ProgramStateContext {
+    pub fn from(options: Config) -> Self {
+        Self {
+            options,
+            identifiers: HashMap::new(),
+            namespaces: HashMap::new(),
+            imports: HashMap::new(),
+            server_mode: ServerMode::Client,
+        }
+    }
 }

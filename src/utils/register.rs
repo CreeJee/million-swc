@@ -2,12 +2,6 @@ use swc_core::{common::sync::HashMapExt, ecma::ast::ImportSpecifier};
 
 use crate::config::ProgramStateContext;
 
-/**
-               *
-ctx: StateContext,
-path: babel.NodePath<t.ImportDeclaration>,
-definition: ImportDefinition,
-               */
 pub fn register_import_definition(
     context: &mut ProgramStateContext,
     decl: &mut swc_core::ecma::ast::ImportDecl,
