@@ -1,7 +1,7 @@
-use std::{borrow::BorrowMut, collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use serde::Deserialize;
-use swc_core::ecma::ast::{Ident, ImportDecl};
+use swc_core::ecma::ast::{Id, ImportDecl};
 
 #[derive(Deserialize)]
 #[serde(untagged)]
@@ -53,9 +53,9 @@ impl Default for ServerMode {
 #[derive(Clone, Default, Debug)]
 pub struct ProgramStateContext {
     pub options: Config,
-    pub identifiers: HashMap<Ident, ImportDecl>,
-    pub namespaces: HashMap<Ident, Vec<ImportDecl>>,
-    pub imports: HashMap<Ident, ImportDecl>,
+    pub identifiers: HashMap<Id, ImportDecl>,
+    pub namespaces: HashMap<Id, Vec<ImportDecl>>,
+    pub imports: HashMap<Id, ImportDecl>,
     pub server_mode: ServerMode,
 }
 impl ProgramStateContext {
