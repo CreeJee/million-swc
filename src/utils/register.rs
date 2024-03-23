@@ -9,17 +9,23 @@ pub fn register_import_definition(
 ) {
     let value = decl.clone();
     match specifier {
-        ImportSpecifier::Default(item) => context.identifiers.insert_same(item.local, value),
+        ImportSpecifier::Default(item) => {
+            context.identifiers.insert_same(item.local.to_id(), value)
+        }
         ImportSpecifier::Named(item) => {
-            let current = context.namespaces.get_mut(&item.local);
+            let current = context.namespaces.get_mut(&item.local.to_id());
             if current.is_none() {
                 return;
             }
             match current {
                 Some(found_current) => found_current.push(value),
-                None => context.namespaces.insert_same(item.local, [value].to_vec()),
+                None => context
+                    .namespaces
+                    .insert_same(item.local.to_id(), [value].to_vec()),
             }
         }
-        ImportSpecifier::Namespace(item) => context.identifiers.insert_same(item.local, value),
+        ImportSpecifier::Namespace(item) => {
+            context.identifiers.insert_same(item.local.to_id(), value)
+        }
     }
 }
