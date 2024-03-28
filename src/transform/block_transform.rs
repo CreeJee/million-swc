@@ -13,7 +13,7 @@ use swc_core::{
 use crate::{
     config::{ProgramStateContext, ServerMode},
     constants::{constant_string::SKIP_ANNOTATION, internal::INTERNAL_IDENT_SYMBOL_NAME},
-    utils::register::register_import_definition,
+    utils::{ast::is_comment_exist, register::register_import_definition},
 };
 fn transform_function_declartion(visitor: &mut BlockTransformVisitor, decl: &mut ImportDecl) {
     let export_name_defauit_ident =
@@ -61,7 +61,11 @@ fn transform_block<C>(node: &mut CallExpr, comments: C)
 where
     C: Comments,
 {
-    let contains = node.comment_range();
+    let range = node.comment_range();
+    let comment = comments.get_leading(range.lo);
+    if is_comment_exist(&comment.unwrap_or_default(), SKIP_ANNOTATION) {
+        return;
+    }
 }
 pub struct BlockTransformVisitor {
     pub context: ProgramStateContext,
