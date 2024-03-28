@@ -34,5 +34,8 @@ pub fn process_transform(program: Program, metadata: TransformPluginProgramMetad
     )
     .expect("invalid packages");
     let context = ProgramStateContext::from(options);
-    return million_program(program, context);
+    return match metadata.comments {
+        Some(comments) => million_program(program, context, comments),
+        None => panic!("million-swc should required comments option"),
+    };
 }

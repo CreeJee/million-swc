@@ -4,9 +4,14 @@ use crate::{
     config::ProgramStateContext, constants::internal::INTERNAL_IDENT_SYMBOL_NAME,
     utils::register::register_import_definition,
 };
-use swc_core::ecma::{
-    ast::{CallExpr, Function, Ident, ImportDecl, ImportSpecifier, ModuleExportName, Str, VarDecl},
-    visit::Fold,
+use swc_core::{
+    common::comments::Comments,
+    ecma::{
+        ast::{
+            CallExpr, Function, Ident, ImportDecl, ImportSpecifier, ModuleExportName, Str, VarDecl,
+        },
+        visit::Fold,
+    },
 };
 pub struct AutoTransformVisitor {
     context: ProgramStateContext,
@@ -58,6 +63,9 @@ impl Fold for AutoTransformVisitor {
     }
 }
 
-pub fn million_auto_program(context: ProgramStateContext) -> impl Fold {
+pub fn million_auto_program<C>(context: ProgramStateContext, comments: C) -> impl Fold
+where
+    C: Comments,
+{
     AutoTransformVisitor { context }
 }

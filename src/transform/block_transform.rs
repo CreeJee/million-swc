@@ -2,15 +2,17 @@ use std::borrow::BorrowMut;
 
 use swc_core::{
     atoms::Atom,
+    common::comments::Comments,
     ecma::{
-        ast::{Ident, ImportDecl, ImportSpecifier, ModuleExportName},
+        ast::{CallExpr, Ident, ImportDecl, ImportSpecifier, ModuleExportName, SpanExt},
         visit::{noop_fold_type, Fold},
     },
+    plugin::proxies::PluginCommentsProxy,
 };
 
 use crate::{
     config::{ProgramStateContext, ServerMode},
-    constants::internal::INTERNAL_IDENT_SYMBOL_NAME,
+    constants::{constant_string::SKIP_ANNOTATION, internal::INTERNAL_IDENT_SYMBOL_NAME},
     utils::register::register_import_definition,
 };
 fn transform_function_declartion(visitor: &mut BlockTransformVisitor, decl: &mut ImportDecl) {
@@ -55,6 +57,12 @@ fn transform_function_declartion(visitor: &mut BlockTransformVisitor, decl: &mut
             _ => {}
         });
 }
+fn transform_block<C>(node: &mut CallExpr, comments: C)
+where
+    C: Comments,
+{
+    let contains = node.comment_range();
+}
 pub struct BlockTransformVisitor {
     pub context: ProgramStateContext,
 }
@@ -65,8 +73,15 @@ impl Fold for BlockTransformVisitor {
         transform_function_declartion(self, &mut n);
         return n;
     }
+    fn fold_call_expr(&mut self, mut n: CallExpr) -> CallExpr {
+        transform_block(&mut n, PluginCommentsProxy);
+        return n;
+    }
 }
 
-pub fn million_block_transform(context: ProgramStateContext) -> impl Fold {
+pub fn million_block_transform<C>(context: ProgramStateContext, comments: C) -> impl Fold
+where
+    C: Comments,
+{
     return BlockTransformVisitor { context };
 }
