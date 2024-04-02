@@ -55,7 +55,7 @@ impl SumType<Option<ImportDecl>> for JSXMemberExpr {
         };
     }
 }
-pub fn get_vaild_import_definition<T>(expr: T, context: ProgramStateContext) -> Option<ImportDecl>
+pub fn get_vaild_import_definition<T>(context: ProgramStateContext, expr: T) -> Option<ImportDecl>
 where
     T: SumType<Option<ImportDecl>>,
 {
